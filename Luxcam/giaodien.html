@@ -123,9 +123,10 @@
       cursor: pointer; perspective: 1000px;
     }
     .product-card:hover { transform: translateY(-8px); box-shadow: 0 30px 50px -20px rgba(0,160,255,0.2); border-color: rgba(255,255,255,0.2); }
-    .product-img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 1.2rem; transition: transform 0.4s; }
+    .product-img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 1.2rem; transition: transform 0.4s; border-radius: 12px; background: #1a1a1d; }
     .product-card:hover .product-img { transform: rotateY(5deg) rotateX(3deg); }
     .product-name { font-size: 1.1rem; font-weight: 500; margin-bottom: 0.3rem; }
+    .product-desc { font-size: 0.85rem; color: #98989e; margin-bottom: 0.8rem; line-height: 1.4; min-height: 2.5em; }
     .product-price { color: #8ab4f8; font-size: 1rem; font-weight: 400; margin-bottom: 0.8rem; }
     .stock-badge {
       display: inline-block; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.75rem;
@@ -153,7 +154,8 @@
       position: absolute; top: 1.5rem; right: 1.8rem; background: none; border: none;
       color: #f5f5f7; font-size: 2rem; cursor: pointer; z-index: 5;
     }
-    .modal-img { width: 100%; max-height: 350px; object-fit: contain; margin-bottom: 1.5rem; border-radius: 16px; }
+    .modal-img { width: 100%; max-height: 350px; object-fit: contain; margin-bottom: 1.5rem; border-radius: 16px; background: #1a1a1d; }
+    .modal-desc { font-size: 1rem; color: #c7c7cc; margin-bottom: 1.5rem; line-height: 1.5; }
     .option-group { margin: 1.5rem 0; }
     .option-group label { display: block; margin-bottom: 0.5rem; color: #98989e; }
     .color-options { display: flex; gap: 1rem; }
@@ -255,6 +257,7 @@
       <button class="modal-close" id="modalClose">&times;</button>
       <img class="modal-img" id="modalImg" src="" alt="">
       <h3 id="modalName"></h3>
+      <p class="modal-desc" id="modalDesc"></p>
       <p style="font-size: 1.3rem; color: #8ab4f8; margin: 0.5rem 0;" id="modalPrice"></p>
       <div class="option-group">
         <label>Màu sắc</label>
@@ -325,69 +328,145 @@
         { id: 'hasselblad', name: 'Hasselblad', color: '#aaa' }
       ];
 
-      // Tạo dữ liệu giả cho mỗi hãng
+      /*
+      =======================================================
+      KHỐI TÙY CHỈNH LINK ẢNH SẢN PHẨM (CHỈ CẦN DÁN VÀO ĐÂY)
+      =======================================================
+      Mỗi sản phẩm có một ID duy nhất theo cấu trúc: [mã hãng]-[loại]-[số]
+      Ví dụ: canon-cam-1, sony-lens-3, fuji-acc-7...
+      Bạn hãy thêm link ảnh vào object bên dưới. Nếu chưa có, sản phẩm sẽ dùng ảnh placeholder mặc định (rất đẹp).
+      */
+      const customProductImages = {
+        // Canon
+        "canon-cam-1": "https://via.placeholder.com/600x400/1a1a1d/c00?text=Canon+EOS+R5+Mark+II",
+        "canon-cam-2": "https://via.placeholder.com/600x400/1a1a1d/c00?text=Canon+EOS+R3",
+        // Thêm link cho các sản phẩm khác ở đây...
+        // Sony
+        "sony-cam-1": "https://via.placeholder.com/600x400/1a1a1d/f60?text=Sony+Alpha+1",
+        // Fuji
+        "fuji-cam-1": "https://via.placeholder.com/600x400/1a1a1d/2d8?text=Fuji+GFX+100+II",
+        // Nikon
+        "nikon-cam-1": "https://via.placeholder.com/600x400/1a1a1d/fc0?text=Nikon+Z9",
+        // Hasselblad
+        "hasselblad-cam-1": "https://via.placeholder.com/600x400/1a1a1d/aaa?text=Hasselblad+X2D+100C",
+      };
+
+      // Mô tả ngắn theo loại sản phẩm
+      const descriptions = {
+        cameras: {
+          canon: "Cảm biến CMOS stacked, lấy nét Dual Pixel, quay 8K RAW.",
+          sony: "Cảm biến Exmor RS, lấy nét Real-time Tracking, chống rung 5 trục.",
+          fuji: "Cảm biến X-Trans CMOS, film simulation, thiết kế retro.",
+          nikon: "Cảm biến CMOS BSI, lấy nét lai 493 điểm, chống rung VR.",
+          hasselblad: "Cảm biến medium format, màu sắc tự nhiên, thiết kế Thụy Điển."
+        },
+        lenses: {
+          canon: "Dòng L cao cấp, chống rung IS, khẩu nhanh.",
+          sony: "Dòng G Master, độ phân giải cao, lấy nét tĩnh lặng.",
+          fuji: "Ống kính XF/GF chống thời tiết, chất lượng quang học hàng đầu.",
+          nikon: "Ống kính NIKKOR Z, phủ nano crystal, siêu nét.",
+          hasselblad: "Ống kính XCD/HC thiết kế cho medium format, chi tiết tối đa."
+        },
+        accessories: {
+          canon: "Phụ kiện chính hãng Canon, bảo hành 12 tháng.",
+          sony: "Phụ kiện chính hãng Sony, tương thích hoàn hảo.",
+          fuji: "Phụ kiện Fujifilm chính hãng, thiết kế đồng bộ.",
+          nikon: "Phụ kiện Nikon chính hãng, bền bỉ theo thời gian.",
+          hasselblad: "Phụ kiện cao cấp Hasselblad, chế tác thủ công."
+        }
+      };
+
+      // Hàm tạo SVG placeholder chi tiết (fallback)
+      function getDetailedPlaceholder(type, brandColor) {
+        const color = brandColor || '#888';
+        if (type === 'cameras') {
+          return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%231a1a1d' rx='10'/%3E%3Crect x='35' y='25' width='130' height='100' rx='12' fill='%232c2c2e' stroke='${encodeURIComponent(color)}' stroke-width='2.5'/%3E%3Crect x='45' y='35' width='30' height='20' rx='4' fill='%233a3a40'/%3E%3Ccircle cx='160' cy='45' r='10' fill='%23444'/%3E%3Ccircle cx='100' cy='70' r='32' fill='%23111114' stroke='%23888' stroke-width='2'/%3E%3Ccircle cx='100' cy='70' r='12' fill='%230a0a0a'/%3E%3Ctext x='100' y='130' text-anchor='middle' fill='%23999' font-size='8' font-family='Inter'%3EMáy ảnh%3C/text%3E%3C/svg%3E`;
+        } else if (type === 'lenses') {
+          return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%231a1a1d' rx='10'/%3E%3Crect x='60' y='45' width='80' height='60' rx='8' fill='%233a3a40' stroke='${encodeURIComponent(color)}' stroke-width='2.5'/%3E%3Ccircle cx='100' cy='55' r='18' fill='%23111114' stroke='%23888' stroke-width='2'/%3E%3Ccircle cx='100' cy='55' r='7' fill='%230a0a0a'/%3E%3Cline x1='90' y1='70' x2='110' y2='70' stroke='%23666' stroke-width='2'/%3E%3Ctext x='100' y='130' text-anchor='middle' fill='%23999' font-size='8' font-family='Inter'%3EỐng kính%3C/text%3E%3C/svg%3E`;
+        } else {
+          return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150' viewBox='0 0 200 150'%3E%3Crect width='200' height='150' fill='%231a1a1d' rx='10'/%3E%3Crect x='70' y='50' width='60' height='50' rx='8' fill='%234a4a50' stroke='${encodeURIComponent(color)}' stroke-width='2.5'/%3E%3Ctext x='100' y='80' text-anchor='middle' fill='%23ccc' font-size='12' font-family='Inter'%3EPK%3C/text%3E%3Ctext x='100' y='130' text-anchor='middle' fill='%23999' font-size='8' font-family='Inter'%3EPhụ kiện%3C/text%3E%3C/svg%3E`;
+        }
+      }
+
+      // Danh sách tên sản phẩm
+      const cameraModels = {
+        canon: ['EOS R5 Mark II', 'EOS R3', 'EOS R6 Mark II', 'EOS R8', 'EOS R10', 'EOS-1D X Mark III', 'EOS 5D Mark IV', 'EOS RP', 'EOS M50 Mark II', 'PowerShot G7 X Mark III'],
+        sony: ['Alpha 1', 'Alpha 7R V', 'Alpha 7 IV', 'Alpha 9 III', 'Alpha 6700', 'Alpha 6100', 'ZV-E1', 'RX100 VII', 'FX3', 'FX30'],
+        fuji: ['GFX 100 II', 'X-T5', 'X-H2S', 'X-T4', 'X-S20', 'X-E4', 'X100VI', 'GFX 50S II', 'X-Pro3', 'X-A7'],
+        nikon: ['Z9', 'Z8', 'Z7 II', 'Z6 II', 'Z5', 'Z50', 'Z30', 'D850', 'D780', 'COOLPIX P1000'],
+        hasselblad: ['X2D 100C', '907X 50C', 'H6D-400c MS', 'X1D II 50C', 'CFV II 50C', '503CW', '500C/M', 'SWC/M', 'ArcBody', 'FlexBody']
+      };
+      const lensNames = {
+        canon: ['RF 24-70mm f/2.8L IS USM', 'RF 70-200mm f/2.8L IS USM', 'RF 50mm f/1.2L USM', 'RF 85mm f/1.2L USM', 'RF 15-35mm f/2.8L IS USM', 'RF 100-500mm f/4.5-7.1L IS USM', 'RF 35mm f/1.8 Macro IS STM', 'EF 24-105mm f/4L IS II USM', 'EF 50mm f/1.8 STM', 'RF 600mm f/11 IS STM'],
+        sony: ['FE 24-70mm f/2.8 GM II', 'FE 70-200mm f/2.8 GM OSS II', 'FE 50mm f/1.2 GM', 'FE 85mm f/1.4 GM', 'FE 16-35mm f/2.8 GM II', 'FE 200-600mm f/5.6-6.3 G OSS', 'FE 35mm f/1.4 GM', 'E 16-55mm f/2.8 G', 'FE 90mm f/2.8 Macro G OSS', 'FE 100-400mm GM'],
+        fuji: ['XF 16-55mm f/2.8 R LM WR', 'XF 50-140mm f/2.8 R LM OIS WR', 'XF 23mm f/1.4 R LM WR', 'XF 56mm f/1.2 R WR', 'GF 32-64mm f/4 R LM WR', 'GF 110mm f/2 R LM WR', 'XF 10-24mm f/4 R OIS WR', 'XF 80mm f/2.8 R LM OIS WR Macro', 'XF 33mm f/1.4 R LM WR', 'GF 45-100mm f/4 R LM OIS WR'],
+        nikon: ['NIKKOR Z 24-70mm f/2.8 S', 'NIKKOR Z 70-200mm f/2.8 VR S', 'NIKKOR Z 50mm f/1.2 S', 'NIKKOR Z 85mm f/1.2 S', 'NIKKOR Z 14-24mm f/2.8 S', 'NIKKOR Z 100-400mm f/4.5-5.6 VR S', 'AF-S 24-70mm f/2.8E ED VR', 'AF-S 50mm f/1.8G', 'NIKKOR Z 40mm f/2', 'NIKKOR Z 105mm f/2.8 VR S'],
+        hasselblad: ['XCD 35-75mm f/3.5-4.5', 'XCD 80mm f/1.9', 'XCD 65mm f/2.8', 'XCD 45mm f/4 P', 'XCD 120mm f/3.5 Macro', 'HC 50mm f/3.5', 'HC 80mm f/2.8', 'HC 150mm f/3.2', 'XCD 21mm f/4', 'XCD 30mm f/3.5']
+      };
+      const accessoryNames = {
+        canon: ['Pin LP-E6NH', 'Sạc LC-E6', 'Túi đựng Canon', 'Thẻ nhớ CFexpress', 'Filter UV 77mm', 'Chân máy Canon', 'Remote RC-6', 'Ống nhòm Canon', 'Máy in Selphy', 'Adapter EF-RF'],
+        sony: ['Pin NP-FZ100', 'Sạc BC-QZ1', 'Túi đựng Sony', 'Thẻ nhớ TOUGH', 'Filter CPL 67mm', 'Chân máy Sony', 'Remote RMT-P1BT', 'Micro ECM-B10', 'Kính ngắm FDA-V1K', 'Adapter LA-EA5'],
+        fuji: ['Pin NP-W235', 'Sạc BC-W235', 'Túi đựng Fuji', 'Thẻ nhớ SD UHS-II', 'Filter ND 58mm', 'Chân máy Fuji', 'Remote RR-100', 'Flash EF-X500', 'Adapter GFX', 'Grip MHG-XT5'],
+        nikon: ['Pin EN-EL15c', 'Sạc MH-25a', 'Túi đựng Nikon', 'Thẻ XQD/CFexpress', 'Filter NC 72mm', 'Chân máy Nikon', 'Remote ML-L7', 'Flash SB-5000', 'Adapter FTZ II', 'Kính ngắm DK-29'],
+        hasselblad: ['Pin BP-000', 'Sạc Hasselblad', 'Túi đựng cao cấp', 'Thẻ CFast 2.0', 'Filter UV 77mm', 'Chân máy H', 'Remote Hasselblad', 'Flash Profoto A10', 'Adapter H-X', 'Grip H']
+      };
+
+      // ==================== TẠO DỮ LIỆU SẢN PHẨM ====================
       function generateProducts() {
         const allProducts = [];
-        const cameraModels = {
-          canon: ['EOS R5 Mark II', 'EOS R3', 'EOS R6 Mark II', 'EOS R8', 'EOS R10', 'EOS-1D X Mark III', 'EOS 5D Mark IV', 'EOS RP', 'EOS M50 Mark II', 'PowerShot G7 X Mark III'],
-          sony: ['Alpha 1', 'Alpha 7R V', 'Alpha 7 IV', 'Alpha 9 III', 'Alpha 6700', 'Alpha 6100', 'ZV-E1', 'RX100 VII', 'FX3', 'FX30'],
-          fuji: ['GFX 100 II', 'X-T5', 'X-H2S', 'X-T4', 'X-S20', 'X-E4', 'X100VI', 'GFX 50S II', 'X-Pro3', 'X-A7'],
-          nikon: ['Z9', 'Z8', 'Z7 II', 'Z6 II', 'Z5', 'Z50', 'Z30', 'D850', 'D780', 'COOLPIX P1000'],
-          hasselblad: ['X2D 100C', '907X 50C', 'H6D-400c MS', 'X1D II 50C', 'CFV II 50C', '503CW', '500C/M', 'SWC/M', 'ArcBody', 'FlexBody']
-        };
-        const lensNames = {
-          canon: ['RF 24-70mm f/2.8L IS USM', 'RF 70-200mm f/2.8L IS USM', 'RF 50mm f/1.2L USM', 'RF 85mm f/1.2L USM', 'RF 15-35mm f/2.8L IS USM', 'RF 100-500mm f/4.5-7.1L IS USM', 'RF 35mm f/1.8 Macro IS STM', 'EF 24-105mm f/4L IS II USM', 'EF 50mm f/1.8 STM', 'RF 600mm f/11 IS STM'],
-          sony: ['FE 24-70mm f/2.8 GM II', 'FE 70-200mm f/2.8 GM OSS II', 'FE 50mm f/1.2 GM', 'FE 85mm f/1.4 GM', 'FE 16-35mm f/2.8 GM II', 'FE 200-600mm f/5.6-6.3 G OSS', 'FE 35mm f/1.4 GM', 'E 16-55mm f/2.8 G', 'FE 90mm f/2.8 Macro G OSS', 'FE 100-400mm GM'],
-          fuji: ['XF 16-55mm f/2.8 R LM WR', 'XF 50-140mm f/2.8 R LM OIS WR', 'XF 23mm f/1.4 R LM WR', 'XF 56mm f/1.2 R WR', 'GF 32-64mm f/4 R LM WR', 'GF 110mm f/2 R LM WR', 'XF 10-24mm f/4 R OIS WR', 'XF 80mm f/2.8 R LM OIS WR Macro', 'XF 33mm f/1.4 R LM WR', 'GF 45-100mm f/4 R LM OIS WR'],
-          nikon: ['NIKKOR Z 24-70mm f/2.8 S', 'NIKKOR Z 70-200mm f/2.8 VR S', 'NIKKOR Z 50mm f/1.2 S', 'NIKKOR Z 85mm f/1.2 S', 'NIKKOR Z 14-24mm f/2.8 S', 'NIKKOR Z 100-400mm f/4.5-5.6 VR S', 'AF-S 24-70mm f/2.8E ED VR', 'AF-S 50mm f/1.8G', 'NIKKOR Z 40mm f/2', 'NIKKOR Z 105mm f/2.8 VR S'],
-          hasselblad: ['XCD 35-75mm f/3.5-4.5', 'XCD 80mm f/1.9', 'XCD 65mm f/2.8', 'XCD 45mm f/4 P', 'XCD 120mm f/3.5 Macro', 'HC 50mm f/3.5', 'HC 80mm f/2.8', 'HC 150mm f/3.2', 'XCD 21mm f/4', 'XCD 30mm f/3.5']
-        };
-        const accessoryNames = {
-          canon: ['Pin LP-E6NH', 'Sạc LC-E6', 'Túi đựng Canon', 'Thẻ nhớ CFexpress', 'Filter UV 77mm', 'Chân máy Canon', 'Remote RC-6', 'Ống nhòm Canon', 'Máy in Selphy', 'Adapter EF-RF'],
-          sony: ['Pin NP-FZ100', 'Sạc BC-QZ1', 'Túi đựng Sony', 'Thẻ nhớ TOUGH', 'Filter CPL 67mm', 'Chân máy Sony', 'Remote RMT-P1BT', 'Micro ECM-B10', 'Kính ngắm FDA-V1K', 'Adapter LA-EA5'],
-          fuji: ['Pin NP-W235', 'Sạc BC-W235', 'Túi đựng Fuji', 'Thẻ nhớ SD UHS-II', 'Filter ND 58mm', 'Chân máy Fuji', 'Remote RR-100', 'Flash EF-X500', 'Adapter GFX', 'Grip MHG-XT5'],
-          nikon: ['Pin EN-EL15c', 'Sạc MH-25a', 'Túi đựng Nikon', 'Thẻ XQD/CFexpress', 'Filter NC 72mm', 'Chân máy Nikon', 'Remote ML-L7', 'Flash SB-5000', 'Adapter FTZ II', 'Kính ngắm DK-29'],
-          hasselblad: ['Pin BP-000', 'Sạc Hasselblad', 'Túi đựng cao cấp', 'Thẻ CFast 2.0', 'Filter UV 77mm', 'Chân máy H', 'Remote Hasselblad', 'Flash Profoto A10', 'Adapter H-X', 'Grip H']
-        };
-
         brands.forEach(brand => {
+          // Máy ảnh
           for (let i = 0; i < 10; i++) {
             const id = `${brand.id}-cam-${i+1}`;
             allProducts.push({
-              id, brand: brand.id, category: 'cameras',
+              id: id,
+              brand: brand.id,
+              category: 'cameras',
               name: cameraModels[brand.id][i],
+              description: descriptions.cameras[brand.id],
               price: Math.floor(25000000 + Math.random() * 150000000),
               colors: ['#222', '#ddd', '#d4af37'].slice(0, 2 + i % 2),
               versions: ['Body Only', 'Kit 24-70mm', 'Kit 24-105mm'].slice(0, 2 + i % 2),
               stock: ['in-stock', 'pre-order', 'out-stock'][i % 3],
               specs: { 'Độ phân giải': '50MP', 'ISO': '100-51200', 'Chống rung': '5 trục', 'Màn hình': '3.2" LCD', 'Quay video': '8K 30p' },
-              img: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%231a1a1d'/%3E%3Crect x='30' y='25' width='140' height='100' rx='15' fill='%232c2c2e' stroke='${encodeURIComponent(brand.color)}' stroke-width='2'/%3E%3Ccircle cx='100' cy='65' r='28' fill='%23111114' stroke='%2377777c' stroke-width='1.5'/%3E%3C/svg%3E`
+              img: customProductImages[id] || null, // nếu không có trong custom, để null -> dùng placeholder
+              placeholder: getDetailedPlaceholder('cameras', brand.color)
             });
           }
+          // Ống kính
           for (let i = 0; i < 10; i++) {
             const id = `${brand.id}-lens-${i+1}`;
             allProducts.push({
-              id, brand: brand.id, category: 'lenses',
+              id: id,
+              brand: brand.id,
+              category: 'lenses',
               name: lensNames[brand.id][i],
+              description: descriptions.lenses[brand.id],
               price: Math.floor(8000000 + Math.random() * 50000000),
               colors: ['#222', '#888'],
               versions: ['Tiêu chuẩn', 'Cao cấp'],
               stock: ['in-stock', 'pre-order', 'out-stock'][i % 3],
               specs: { 'Tiêu cự': '24-70mm', 'Khẩu độ': 'f/2.8', 'Chống rung': 'Có', 'Trọng lượng': '900g' },
-              img: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%231a1a1d'/%3E%3Crect x='60' y='40' width='80' height='70' rx='10' fill='%233a3a40' stroke='${encodeURIComponent(brand.color)}' stroke-width='2'/%3E%3Ccircle cx='100' cy='55' r='18' fill='%23111114' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E`
+              img: customProductImages[id] || null,
+              placeholder: getDetailedPlaceholder('lenses', brand.color)
             });
           }
+          // Phụ kiện
           for (let i = 0; i < 10; i++) {
             const id = `${brand.id}-acc-${i+1}`;
             allProducts.push({
-              id, brand: brand.id, category: 'accessories',
+              id: id,
+              brand: brand.id,
+              category: 'accessories',
               name: accessoryNames[brand.id][i],
+              description: descriptions.accessories[brand.id],
               price: Math.floor(500000 + Math.random() * 8000000),
               colors: ['#222'],
               versions: ['Tiêu chuẩn'],
               stock: ['in-stock', 'pre-order'][i % 2],
               specs: { 'Loại': 'Phụ kiện chính hãng', 'Bảo hành': '12 tháng' },
-              img: `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%231a1a1d'/%3E%3Crect x='70' y='50' width='60' height='50' rx='8' fill='%234a4a50' stroke='${encodeURIComponent(brand.color)}' stroke-width='2'/%3E%3C/svg%3E`
+              img: customProductImages[id] || null,
+              placeholder: getDetailedPlaceholder('accessories', brand.color)
             });
           }
         });
@@ -400,7 +479,6 @@
       let currentCategory = 'cameras';
 
       const brandTabs = document.getElementById('brandTabs');
-      const categoryTabs = document.getElementById('categoryTabs');
       const productGrid = document.getElementById('productGrid');
       const modalOverlay = document.getElementById('modalOverlay');
       const modalContent = document.getElementById('modalContent');
@@ -420,34 +498,34 @@
           });
         });
       }
+
       function renderProducts() {
         let filtered = allProducts.filter(p => p.category === currentCategory);
         if (currentBrand !== 'all') filtered = filtered.filter(p => p.brand === currentBrand);
         productGrid.innerHTML = filtered.map(p => {
           const stockClass = p.stock === 'in-stock' ? 'in-stock' : (p.stock === 'pre-order' ? 'pre-order' : 'out-stock');
           const stockText = p.stock === 'in-stock' ? 'Còn hàng' : (p.stock === 'pre-order' ? 'Sắp về hàng' : 'Hết hàng');
+          // Nếu có ảnh custom (img khác null) thì dùng, ngược lại dùng placeholder
+          const imgSrc = p.img || p.placeholder;
           return `<div class="product-card" data-id="${p.id}">
-            <img src="${p.img}" alt="${p.name}" class="product-img">
+            <img src="${imgSrc}" alt="${p.name}" class="product-img" onerror="this.onerror=null; this.src='${p.placeholder}';">
             <div class="product-name">${p.name}</div>
+            <div class="product-desc">${p.description}</div>
             <div class="product-price">${p.price.toLocaleString('vi-VN')} ₫</div>
             <span class="stock-badge ${stockClass}">${stockText}</span>
           </div>`;
         }).join('');
-        // Gán sự kiện click mở modal
         document.querySelectorAll('.product-card').forEach(card => {
           card.addEventListener('click', () => {
-            const id = card.dataset.id;
-            openModal(id);
+            openModal(card.dataset.id);
           });
         });
       }
-      renderBrandTabs();
-      renderProducts();
 
       // Category tabs
-      categoryTabs.querySelectorAll('.category-tab').forEach(tab => {
+      document.querySelectorAll('.category-tab').forEach(tab => {
         tab.addEventListener('click', () => {
-          categoryTabs.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           currentCategory = tab.dataset.category;
           renderProducts();
@@ -463,8 +541,12 @@
         selectedVersion = product.versions[0];
 
         document.getElementById('modalName').textContent = product.name;
+        document.getElementById('modalDesc').textContent = product.description;
         updateModalPrice();
-        document.getElementById('modalImg').src = product.img;
+        const modalImg = document.getElementById('modalImg');
+        const imgSrc = product.img || product.placeholder;
+        modalImg.src = imgSrc;
+        modalImg.onerror = () => { modalImg.src = product.placeholder; modalImg.onerror = null; };
         const stockClass = product.stock === 'in-stock' ? 'in-stock' : (product.stock === 'pre-order' ? 'pre-order' : 'out-stock');
         const stockText = product.stock === 'in-stock' ? 'Còn hàng' : (product.stock === 'pre-order' ? 'Sắp về hàng' : 'Hết hàng');
         const stockEl = document.getElementById('modalStock');
@@ -481,9 +563,7 @@
             selectedColor = dot.dataset.color;
             document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
             dot.classList.add('active');
-            // Thay đổi ảnh có thể qua filter (mô phỏng)
-            const img = document.getElementById('modalImg');
-            img.style.filter = `hue-rotate(${selectedColor === '#222' ? 0 : selectedColor === '#ddd' ? 180 : 45}deg)`;
+            modalImg.style.filter = `hue-rotate(${selectedColor === '#222' ? 0 : selectedColor === '#ddd' ? 180 : 45}deg)`;
           });
         });
 
@@ -505,7 +585,6 @@
         const specsTable = document.getElementById('specsTable').querySelector('tbody');
         specsTable.innerHTML = Object.entries(product.specs).map(([key, val]) => `<tr><td>${key}</td><td>${val}</td></tr>`).join('');
 
-        // Tạm dừng Lenis
         lenis.stop();
         modalOverlay.classList.add('active');
         gsap.fromTo(modalContent, { scale: 0.95, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'power4.out' });
@@ -514,7 +593,7 @@
       function updateModalPrice() {
         const basePrice = selectedProduct.price;
         const versionIndex = selectedProduct.versions.indexOf(selectedVersion);
-        const extra = versionIndex * 5000000; // mỗi phiên bản cộng thêm 5tr
+        const extra = versionIndex * 5000000;
         document.getElementById('modalPrice').textContent = (basePrice + extra).toLocaleString('vi-VN') + ' ₫';
       }
 
@@ -530,7 +609,6 @@
       });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-      // Thêm vào giỏ từ modal
       document.getElementById('modalAddToCart').addEventListener('click', () => {
         if (!selectedProduct) return;
         const cartItem = {
@@ -593,6 +671,10 @@
         nav.style.background = scroll > 50 ? 'rgba(10,10,10,0.85)' : 'rgba(10,10,10,0.65)';
         nav.style.borderColor = scroll > 50 ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.12)';
       });
+
+      // Khởi động
+      renderBrandTabs();
+      renderProducts();
     })();
   </script>
 </body>
