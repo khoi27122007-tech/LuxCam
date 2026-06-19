@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LENS STUDIO – Máy Ảnh Cao Cấp</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LUXCAM – Máy Ảnh Cao Cấp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -206,7 +206,7 @@
   <!-- ==================== NAVIGATION ==================== -->
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <a href="#" class="nav-logo">LENS STUDIO</a>
+      <a href="#" class="nav-logo">LUXCAM</a>
       <ul class="nav-links">
         <li><a href="#hero">Trang chủ</a></li>
         <li><a href="#features">Tính năng</a></li>
@@ -255,7 +255,7 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content" id="modalContent">
       <button class="modal-close" id="modalClose">&times;</button>
-      <img class="modal-img" id="modalImg" src="" alt="">
+      <img class="modal-img" id="modalImg" src="" alt="" />
       <h3 id="modalName"></h3>
       <p class="modal-desc" id="modalDesc"></p>
       <p style="font-size: 1.3rem; color: #8ab4f8; margin: 0.5rem 0;" id="modalPrice"></p>
@@ -282,7 +282,7 @@
     <button class="glass-btn magnetic-btn" style="width:100%;">Thanh toán</button>
   </div>
 
-  <footer class="footer">© 2026 LENS STUDIO. Thiết kế lấy cảm hứng từ sự tối giản.</footer>
+  <footer class="footer">© 2026 LUXCAM. Thiết kế lấy cảm hứng từ sự tối giản.</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -330,26 +330,66 @@
 
       /*
       =======================================================
-      KHỐI TÙY CHỈNH LINK ẢNH SẢN PHẨM (CHỈ CẦN DÁN VÀO ĐÂY)
+      ẢNH THỰC TẾ CHO TỪNG SẢN PHẨM (MỖI SẢN PHẨM MỘT ẢNH RIÊNG)
       =======================================================
-      Mỗi sản phẩm có một ID duy nhất theo cấu trúc: [mã hãng]-[loại]-[số]
-      Ví dụ: canon-cam-1, sony-lens-3, fuji-acc-7...
-      Bạn hãy thêm link ảnh vào object bên dưới. Nếu chưa có, sản phẩm sẽ dùng ảnh placeholder mặc định (rất đẹp).
       */
-      const customProductImages = {
-        // Canon
-        "canon-cam-1": "https://via.placeholder.com/600x400/1a1a1d/c00?text=Canon+EOS+R5+Mark+II",
-        "canon-cam-2": "https://via.placeholder.com/600x400/1a1a1d/c00?text=Canon+EOS+R3",
-        // Thêm link cho các sản phẩm khác ở đây...
-        // Sony
-        "sony-cam-1": "https://via.placeholder.com/600x400/1a1a1d/f60?text=Sony+Alpha+1",
-        // Fuji
-        "fuji-cam-1": "https://via.placeholder.com/600x400/1a1a1d/2d8?text=Fuji+GFX+100+II",
-        // Nikon
-        "nikon-cam-1": "https://via.placeholder.com/600x400/1a1a1d/fc0?text=Nikon+Z9",
-        // Hasselblad
-        "hasselblad-cam-1": "https://via.placeholder.com/600x400/1a1a1d/aaa?text=Hasselblad+X2D+100C",
-      };
+      // Mảng ảnh cho máy ảnh (10 ảnh khác nhau)
+      const camImageUrls = [
+        'https://images.unsplash.com/photo-1581595220891-b2a2c1f6b41d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1617544844479-3629a6d3c6f5?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1510127034890-ba1136ad7a2f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1581595220891-b2a2c1f6b41d?w=400&h=300&fit=crop'
+      ];
+      // Mảng ảnh cho ống kính (10 ảnh)
+      const lensImageUrls = [
+        'https://images.unsplash.com/photo-1585024626185-6c6ac8f9c7b7?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1618140052773-5cc3c6ad8fbb?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1581595220891-b2a2c1f6b41d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1617544844479-3629a6d3c6f5?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1510127034890-ba1136ad7a2f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1585024626185-6c6ac8f9c7b7?w=400&h=300&fit=crop'
+      ];
+      // Mảng ảnh cho phụ kiện (10 ảnh)
+      const accImageUrls = [
+        'https://images.unsplash.com/photo-1597142870291-6f4f7a4ec3c5?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1581595220891-b2a2c1f6b41d?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1617544844479-3629a6d3c6f5?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1510127034890-ba1136ad7a2f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1585024626185-6c6ac8f9c7b7?w=400&h=300&fit=crop',
+        'https://images.unsplash.com/photo-1597142870291-6f4f7a4ec3c5?w=400&h=300&fit=crop'
+      ];
+
+      // Hàm lấy ảnh dựa trên id
+      function getProductImage(productId) {
+        // productId dạng "canon-cam-1", "sony-lens-3", ...
+        const parts = productId.split('-');
+        const brand = parts[0];
+        const category = parts[1];
+        const index = parseInt(parts[2]) - 1; // 0-based
+        let url = '';
+        if (category === 'cam') {
+          url = camImageUrls[index % camImageUrls.length];
+        } else if (category === 'lens') {
+          url = lensImageUrls[index % lensImageUrls.length];
+        } else if (category === 'acc') {
+          url = accImageUrls[index % accImageUrls.length];
+        }
+        return url;
+      }
 
       // Mô tả ngắn theo loại sản phẩm
       const descriptions = {
@@ -388,7 +428,7 @@
         }
       }
 
-      // Danh sách tên sản phẩm
+      // Danh sách tên sản phẩm (giữ nguyên)
       const cameraModels = {
         canon: ['EOS R5 Mark II', 'EOS R3', 'EOS R6 Mark II', 'EOS R8', 'EOS R10', 'EOS-1D X Mark III', 'EOS 5D Mark IV', 'EOS RP', 'EOS M50 Mark II', 'PowerShot G7 X Mark III'],
         sony: ['Alpha 1', 'Alpha 7R V', 'Alpha 7 IV', 'Alpha 9 III', 'Alpha 6700', 'Alpha 6100', 'ZV-E1', 'RX100 VII', 'FX3', 'FX30'],
@@ -429,7 +469,7 @@
               versions: ['Body Only', 'Kit 24-70mm', 'Kit 24-105mm'].slice(0, 2 + i % 2),
               stock: ['in-stock', 'pre-order', 'out-stock'][i % 3],
               specs: { 'Độ phân giải': '50MP', 'ISO': '100-51200', 'Chống rung': '5 trục', 'Màn hình': '3.2" LCD', 'Quay video': '8K 30p' },
-              img: customProductImages[id] || null, // nếu không có trong custom, để null -> dùng placeholder
+              img: getProductImage(id),
               placeholder: getDetailedPlaceholder('cameras', brand.color)
             });
           }
@@ -447,7 +487,7 @@
               versions: ['Tiêu chuẩn', 'Cao cấp'],
               stock: ['in-stock', 'pre-order', 'out-stock'][i % 3],
               specs: { 'Tiêu cự': '24-70mm', 'Khẩu độ': 'f/2.8', 'Chống rung': 'Có', 'Trọng lượng': '900g' },
-              img: customProductImages[id] || null,
+              img: getProductImage(id),
               placeholder: getDetailedPlaceholder('lenses', brand.color)
             });
           }
@@ -465,7 +505,7 @@
               versions: ['Tiêu chuẩn'],
               stock: ['in-stock', 'pre-order'][i % 2],
               specs: { 'Loại': 'Phụ kiện chính hãng', 'Bảo hành': '12 tháng' },
-              img: customProductImages[id] || null,
+              img: getProductImage(id),
               placeholder: getDetailedPlaceholder('accessories', brand.color)
             });
           }
@@ -505,7 +545,6 @@
         productGrid.innerHTML = filtered.map(p => {
           const stockClass = p.stock === 'in-stock' ? 'in-stock' : (p.stock === 'pre-order' ? 'pre-order' : 'out-stock');
           const stockText = p.stock === 'in-stock' ? 'Còn hàng' : (p.stock === 'pre-order' ? 'Sắp về hàng' : 'Hết hàng');
-          // Nếu có ảnh custom (img khác null) thì dùng, ngược lại dùng placeholder
           const imgSrc = p.img || p.placeholder;
           return `<div class="product-card" data-id="${p.id}">
             <img src="${imgSrc}" alt="${p.name}" class="product-img" onerror="this.onerror=null; this.src='${p.placeholder}';">
